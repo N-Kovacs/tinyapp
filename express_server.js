@@ -52,7 +52,15 @@ app.get("/urls/:id", (req, res) => {
 
 app.post("/urls", (req, res) => {
   console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  let randString = generateRandomString();
+  urlDatabase[randString] =req.body.longURL
+  res.redirect("/urls/" + randString)
+});
+
+app.get("/u/:id", (req, res) => {
+  longURL = urlDatabase[req.params.id]
+  console.log(longURL)
+  res.redirect(longURL);
 });
 
 
