@@ -4,13 +4,13 @@ const PORT = 8080; // default port 8080
 
 app.set("view engine", "ejs");
 
-function generateRandomString() {
+const generateRandomString =function() {
   let poschar = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = ""
-  for(let i = 0; i < 6; i++) {
+  let result = "";
+  for (let i = 0; i < 6; i++) {
     result += poschar.charAt(Math.floor(Math.random() * poschar.length));
   }
-  return result
+  return result;
 }
 
 const urlDatabase = {
@@ -53,13 +53,18 @@ app.get("/urls/:id", (req, res) => {
 app.post("/urls", (req, res) => {
   console.log(req.body); // Log the POST request body to the console
   let randString = generateRandomString();
-  urlDatabase[randString] =req.body.longURL
-  res.redirect("/urls/" + randString)
+  urlDatabase[randString] = req.body.longURL;
+  res.redirect("/urls/" + randString);
 });
 
+app.post("/urls/:id/delete", (req, res) => {
+  delete urlDatabase[req.params.id];
+  res.redirect("/urls/");
+  
+});
 app.get("/u/:id", (req, res) => {
-  longURL = urlDatabase[req.params.id]
-  console.log(longURL)
+  longURL = urlDatabase[req.params.id];
+  console.log(longURL);
   res.redirect(longURL);
 });
 
