@@ -51,10 +51,18 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
+  // console.log(req.body); // Log the POST request body to the console
   let randString = generateRandomString();
   urlDatabase[randString] = req.body.longURL;
   res.redirect("/urls/" + randString);
+});
+
+app.post("/urls/:id", (req, res) => {
+  console.log(req.body); // Log the POST request body to the console
+  console.log(urlDatabase)
+  console.log(req.params.id)
+  urlDatabase[req.params.id] = req.body.longURL;
+  res.redirect("/urls/");
 });
 
 app.post("/urls/:id/delete", (req, res) => {
