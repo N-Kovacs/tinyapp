@@ -5,13 +5,14 @@
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
     integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous" />
-  <title>URL - TinyApp Example</title>
+  <title>Create Account</title>
+  
 </head>
 
 <body>
   <%- include('partials/_header') %>
-  <h2>Create Account:</h2>
-  <form class="form-group" action="/register" method="POST">
+  <h2>Log into Account:</h2>
+  <form class="form-group" action="/login" method="POST">
     
     <div class="form-group">
       <label for="InputEmail">Email address</label>
@@ -21,7 +22,7 @@
       <label for="InputPassword">Password</label>
       <input type="password" class="form-control" id="InputPassword" name = "password" placeholder="Password">
     </div>
-    <button type="submit" class="btn btn-primary">Register</button>
+    <button type="submit" class="btn btn-primary">Log in</button>
   </form>
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"

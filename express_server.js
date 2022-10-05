@@ -17,7 +17,14 @@ const generateRandomString =function() {
   return result;
 }
 
-
+const userNameCheck = function(emailCheck){
+  for (const user in users){
+    if (users[user].email === emailCheck){
+      return true
+    }
+  }
+  return false
+}
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -71,6 +78,15 @@ app.get("/register", (req, res) => {
   res.render("register", templateVars);
 });
 
+app.get("/login", (req, res) => {
+  const templateVars = { 
+    urls: urlDatabase,
+    users: users, 
+    user_id: req.cookies["user_id"]
+  };
+  res.render("login", templateVars);
+});
+
 app.get("/urls/new", (req, res) => {
   const templateVars= { users: users, user_id: req.cookies["user_id"] };
   res.render("urls_new", templateVars);
@@ -107,11 +123,16 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  console.log(req.body.login)
-  console.log('Cookies: ', req.cookies)
-  res.cookie("username", req.body.login)
-  console.log('Cookies: ', req.cookies)
-  res.redirect("/urls/");
+  for (const user in users) {
+    if(users[user].email === req.body.email){
+      if(users[user].password === req.body.password){
+        res.cookie("user_id", users[user].id)
+        res.redirect("/urls/")
+      }
+    }
+  }
+  res.status(400);
+  res.send('403: Log in failed')
 });
 
 app.post("/logout", (req, res) => {
@@ -125,14 +146,21 @@ app.post("/logout", (req, res) => {
 
 app.post("/register", (req, res) => {
   userID = generateRandomString();
-  users[userID] = {
-    id: userID,
-    email: req.body.email,
-    password: req.body.password
+  if (userNameCheck(req.body.email) || req.body.email === "" || req.body.password === "") {
+    res.status(400);
+    res.send('400: Error creating email, please try again')
+  } else{
+    users[userID] = {
+      id: userID,
+      email: req.body.email,
+      password: req.body.password
+    }
+    res.cookie("user_id", userID)
+    res.redirect("/urls/");
+
   }
-  res.cookie("user_id", userID)
-  console.log(users[userID].email)
-  res.redirect("/urls/");
+
+
 });
 
 

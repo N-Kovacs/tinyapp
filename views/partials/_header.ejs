@@ -37,15 +37,11 @@
 
       
   <% } else{ %>  
+  <form class="form-inline form-inline-sm" action="/register" method="GET">
+      <button type="submit" class="btn btn-primary btn-sm">Register</button>
+  </form>
 
-  <form class="form-inline form-inline-sm" action="/login" method="POST">
-      <input
-        class="form-control form-control-sm "
-        type="text"
-        name="login"
-        placeholder="Username"
-        style="width: 200px;"
-      />
+  <form class="form-inline form-inline-sm" action="/login" method="GET">
       <button type="submit" class="btn btn-primary btn-sm">Log In</button>
   </form>
  <% } %> 
