@@ -24,6 +24,15 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = {
+  exampleuser: {
+    id: "exampleuser",
+    email: "user@example.com",
+    password: "i<3examples",
+  }
+};
+
+
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
@@ -46,18 +55,33 @@ app.get("/urls", (req, res) => {
   console.log(req.cookie)
   const templateVars = { 
     urls: urlDatabase,
-    username: req.cookies["username"], 
+    users: users,
+    user_id: req.cookies["user_id"]
   };
+  
   res.render("urls_index", templateVars);
 });
 
+app.get("/register", (req, res) => {
+  const templateVars = { 
+    urls: urlDatabase,
+    users: users, 
+    user_id: req.cookies["user_id"]
+  };
+  res.render("register", templateVars);
+});
+
 app.get("/urls/new", (req, res) => {
-  const templateVars= { username: req.cookies["username"] };
+  const templateVars= { users: users, user_id: req.cookies["user_id"] };
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], username: req.cookies["username"] };
+  const templateVars = { 
+    id: req.params.id,
+    longURL: urlDatabase[req.params.id], 
+    users: users, 
+    user_id: req.cookies["user_id"] };
   res.render("urls_show", templateVars);
 });
 
@@ -93,16 +117,31 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
   // console.log(req.body.login)
   // console.log('Cookies: ', req.cookies)
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   // console.log('Cookies: ', req.cookies)
   res.redirect("/urls/");
 });
+
+
+app.post("/register", (req, res) => {
+  userID = generateRandomString();
+  users[userID] = {
+    id: userID,
+    email: req.body.email,
+    password: req.body.password
+  }
+  res.cookie("user_id", userID)
+  console.log(users[userID].email)
+  res.redirect("/urls/");
+});
+
 
 app.get("/u/:id", (req, res) => {
   longURL = urlDatabase[req.params.id];
   console.log(longURL);
   res.redirect(longURL);
 });
+
 
 
 

@@ -26,11 +26,11 @@
 
     </div>
 
-    <% if(username){ %>
+    <% if(user_id){ %>
 
       <form class="form-inline" action="/logout" method="POST">
         <div class="form-group mb-2 ">
-          <label for="longURL">logged in as: <%= username %></label>
+          <label for="longURL">logged in as: <%= users[user_id].email %></label>
           <button type="submit" class="btn btn-outline-dark btn-sm">Log Out</button>
         </div>
       </form>
