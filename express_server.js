@@ -35,20 +35,19 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-//shows urls of active user, redirects to login page if not logged in
+//shows urls of active user, or nothing if not logged in
 app.get("/urls", (req, res) => {
-
-  if ((req.session.user_id) && (users[req.session.user_id])) {
-    let userURL = urlsForUser(req.session.user_id, urlDatabase, users);
-    const templateVars = {
-      urls: userURL,
-      users: users,
-      user_id: req.session.user_id
-    };
-    res.render("urls_index", templateVars);
-  } else {
-    res.redirect("/urls/new");
+  let userURL = {};
+  if (req.session.user_id) {
+    userURL = urlsForUser(req.session.user_id, urlDatabase, users);
   }
+  const templateVars = {
+    urls: userURL,
+    users: users,
+    user_id: req.session.user_id
+  };
+  res.render("urls_index", templateVars);
+
 });
 
 //shows the register page, where new users can be created
@@ -187,7 +186,7 @@ app.post("/login", (req, res) => {
 // deletes user cookie to log out
 app.post("/logout", (req, res) => {
   req.session.user_id = null;
-  res.redirect("/urls/");
+  res.redirect("/urls");
 });
 
 
