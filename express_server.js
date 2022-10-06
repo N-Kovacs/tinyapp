@@ -2,7 +2,7 @@
 const express = require("express");
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
-const { userNameCheck, generateRandomString, urlsForUser} = require("./helpers");
+const { userNameCheck, generateRandomString, urlsForUser } = require("./helpers");
 
 
 const app = express();
@@ -19,7 +19,13 @@ app.use(cookieSession({
 app.set("view engine", "ejs");
 
 const urlDatabase = {};
-const users = {};
+const users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  }
+};
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -89,20 +95,25 @@ app.get("/urls/new", (req, res) => {
 
 //lets users view their existing links, if accessed while not logged in or as not the owner, instead shows error
 app.get("/urls/:id", (req, res) => {
-  if ((req.session.user_id) === urlDatabase[req.params.id].userID) {
-    const templateVars = {
-      id: req.params.id,
-      longURL: urlDatabase[req.params.id].longURL,
-      users: users,
-      user_id: req.session.user_id
-    };
-    res.render("urls_show", templateVars);
-  } else if ((req.session.user_id)) {
-    res.status(401);
-    res.send('401: You do not own this url');
+  if (urlDatabase[req.params.id]) {
+    if ((req.session.user_id) === urlDatabase[req.params.id].userID) {
+      const templateVars = {
+        id: req.params.id,
+        longURL: urlDatabase[req.params.id].longURL,
+        users: users,
+        user_id: req.session.user_id
+      };
+      res.render("urls_show", templateVars);
+    } else if ((req.session.user_id)) {
+      res.status(401);
+      res.send('401: You do not own this url');
+    } else {
+      res.status(401);
+      res.send('401: You are not logged in');
+    }
   } else {
-    res.status(401);
-    res.send('401: Must be logged in');
+    res.status(404);
+    res.send('404: Invalid Url');
   }
 });
 
@@ -169,7 +180,7 @@ app.post("/login", (req, res) => {
   let passcheck = userNameCheck(req.body.email, users);
   if (passcheck) {
     if (bcrypt.compareSync((req.body.password), passcheck.password)) {
-      req.session.user_id =  passcheck.id;
+      req.session.user_id = passcheck.id;
       res.redirect("/urls/");
     } else {
       res.status(403);
@@ -202,7 +213,7 @@ app.post("/register", (req, res) => {
       email: req.body.email,
       password: bcrypt.hashSync(req.body.password)
     };
-    req.session.user_id =  userID;
+    req.session.user_id = userID;
     res.redirect("/urls/");
   }
 });
