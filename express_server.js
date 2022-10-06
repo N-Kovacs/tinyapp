@@ -1,11 +1,11 @@
+//requires
 const express = require("express");
-
-const cookieSession = require('cookie-session')
-const bcrypt = require("bcryptjs")
-const app = express();
+const cookieSession = require('cookie-session');
+const bcrypt = require("bcryptjs");
 const { userNameCheck, generateRandomString, urlsForUser} = require("./helpers");
 
 
+const app = express();
 const PORT = 8080; // default port 8080
 
 app.use(cookieSession({
@@ -14,12 +14,11 @@ app.use(cookieSession({
 
   // Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
-}))
+}));
 
 app.set("view engine", "ejs");
 
 const urlDatabase = {};
-
 const users = {};
 
 app.use(express.urlencoded({ extended: true }));
@@ -29,35 +28,30 @@ app.get("/", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`Tinyapp listening on port ${PORT}!`);
 });
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
+//shows urls of active user, redirects to login page if not logged in
 app.get("/urls", (req, res) => {
 
   if ((req.session.user_id) && (users[req.session.user_id])) {
-    console.log(urlDatabase[req.session.user_id])
     let userURL = urlsForUser(req.session.user_id, urlDatabase, users);
-    console.log(userURL);
     const templateVars = {
       urls: userURL,
       users: users,
       user_id: req.session.user_id
-    }; 
-
+    };
     res.render("urls_index", templateVars);
   } else {
     res.redirect("/urls/new");
   }
 });
 
+//shows the register page, where new users can be created
 app.get("/register", (req, res) => {
   const templateVars = {
     urls: urlDatabase,
@@ -70,6 +64,8 @@ app.get("/register", (req, res) => {
   res.render("register", templateVars);
 });
 
+
+//shows the login page, where existing users can login
 app.get("/login", (req, res) => {
   const templateVars = {
     urls: urlDatabase,
@@ -82,6 +78,7 @@ app.get("/login", (req, res) => {
   res.render("login", templateVars);
 });
 
+//lets logged in users create new urls, redirects to login page if not logged in
 app.get("/urls/new", (req, res) => {
   const templateVars = { users: users, user_id: req.session.user_id };
   if (!(req.session.user_id)) {
@@ -89,8 +86,9 @@ app.get("/urls/new", (req, res) => {
   } else {
     res.render("urls_new", templateVars);
   }
-}); 
+});
 
+//lets users view their existing links, if accessed while not logged in or as not the owner, instead shows error
 app.get("/urls/:id", (req, res) => {
   if ((req.session.user_id) === urlDatabase[req.params.id].userID) {
     const templateVars = {
@@ -109,11 +107,22 @@ app.get("/urls/:id", (req, res) => {
   }
 });
 
+// sends to location of redirect if it exists, otherwise sends error
+app.get("/u/:id", (req, res) => {
+  if (urlDatabase[req.params.id]) {
+    let direct = urlDatabase[req.params.id].longURL;
+    res.redirect(direct);
+  } else {
+    res.status(404);
+    res.send('404: Redirect does not exist');
+  }
+});
+
+//creates new url links, if user is logged in, otherwise sends error
 app.post("/urls", (req, res) => {
   if ((req.session.user_id)) {
     let randString = generateRandomString();
     urlDatabase[randString] = { longURL: req.body.longURL, userID: req.session.user_id };
-    console.log(urlDatabase);
     res.redirect("/urls/" + randString);
 
   } else {
@@ -123,6 +132,8 @@ app.post("/urls", (req, res) => {
 
 
 });
+
+// edits existing url links if user is owns link and is logged in, otherwise sends error
 
 app.post("/urls/:id", (req, res) => {
   if (!urlDatabase[req.params.id]) {
@@ -140,6 +151,7 @@ app.post("/urls/:id", (req, res) => {
   }
 });
 
+// deletes existing url links if user owns link and is logged in, otherwise sends error
 app.post("/urls/:id/delete", (req, res) => {
   if (!urlDatabase[req.params.id]) {
     res.status(404);
@@ -153,13 +165,13 @@ app.post("/urls/:id/delete", (req, res) => {
   }
 });
 
+// logs in with correct username and password
 app.post("/login", (req, res) => {
-  let passcheck = userNameCheck(req.body.email, users)
-  if (passcheck){
+  let passcheck = userNameCheck(req.body.email, users);
+  if (passcheck) {
     if (bcrypt.compareSync((req.body.password), passcheck.password)) {
       req.session.user_id =  passcheck.id;
       res.redirect("/urls/");
-      failed = false       
     } else {
       res.status(403);
       res.send('403: Log in failed');
@@ -171,14 +183,17 @@ app.post("/login", (req, res) => {
 
 });
 
+
+// deletes user cookie to log out
 app.post("/logout", (req, res) => {
   req.session.user_id = null;
   res.redirect("/urls/");
-}); 
+});
 
 
+//creates a new user, assuming new email, and no blank entries
 app.post("/register", (req, res) => {
-  userID = generateRandomString();
+  let userID = generateRandomString();
   if ((userNameCheck(req.body.email, users)) || req.body.email === "" || req.body.password === "") {
     res.status(400);
     res.send('400: Error creating email, please try again');
@@ -190,27 +205,11 @@ app.post("/register", (req, res) => {
     };
     req.session.user_id =  userID;
     res.redirect("/urls/");
-
   }
-
-
 });
 
 
-app.get("/u/:id", (req, res) => {
-  if (urlDatabase[req.params.id]){
-    console.log(urlDatabase);
-    console.log(urlDatabase[req.params.id].longURL);
-    let direct = urlDatabase[req.params.id].longURL;
-      res.redirect(direct);
-  } else {
-    res.status(404);
-    res.send('404: Redirect does not exist')
-}
 
-
-
-});
 
 
 
