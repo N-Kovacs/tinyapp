@@ -33,10 +33,6 @@ app.get("/", (req, res) => {
   res.redirect("/login");
 });
 
-app.listen(PORT, () => {
-  console.log(`Tinyapp listening on port ${PORT}!`);
-});
-
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
@@ -216,6 +212,10 @@ app.post("/register", (req, res) => {
     req.session.user_id = userID;
     res.redirect("/urls/");
   }
+});
+
+app.listen(PORT, () => {
+  console.log(`Tinyapp listening on port ${PORT}!`);
 });
 
 
